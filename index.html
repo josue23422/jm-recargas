@@ -242,6 +242,162 @@
     nav a { margin-left: 10px; font-size: 0.85rem; }
     header { flex-direction: column; gap: 10px; }
   }
+ /* ===================== MODAL ===================== */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 8, 18, 0.75);
+  backdrop-filter: blur(6px);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+.modal-overlay.active { display: flex; }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal {
+  background: #151932;
+  border: 1px solid #2a3158;
+  border-radius: 16px;
+  padding: 32px 28px;
+  max-width: 420px;
+  width: 100%;
+  position: relative;
+  animation: slideUp 0.3s ease;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-close {
+  position: absolute;
+  top: 14px; right: 14px;
+  background: transparent;
+  border: none;
+  color: #7f87a8;
+  font-size: 1.2rem;
+  cursor: pointer;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+.modal-close:hover {
+  background: #2a3158;
+  color: #fff;
+}
+
+.modal-icon {
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 8px;
+}
+.modal h3 {
+  color: #fff;
+  text-align: center;
+  font-size: 1.3rem;
+  margin-bottom: 4px;
+}
+.modal-sub {
+  text-align: center;
+  color: #7f87a8;
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+}
+
+.modal-summary {
+  background: #0f1220;
+  border: 1px solid #232a4d;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.modal-summary > div {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 0.92rem;
+  color: #b8bfd8;
+}
+.modal-summary > div strong {
+  color: #e6e8f0;
+  font-weight: 600;
+}
+.modal-summary .modal-total {
+  border-top: 1px dashed #2a3158;
+  margin-top: 6px;
+  padding-top: 12px;
+  font-size: 1rem;
+}
+.modal-summary .modal-total strong {
+  color: #7c9cff;
+  font-size: 1.15rem;
+}
+
+.modal input {
+  width: 100%;
+  padding: 12px 14px;
+  background: #0f1220;
+  border: 1px solid #2a3158;
+  border-radius: 8px;
+  color: #e6e8f0;
+  font-size: 0.95rem;
+  margin-bottom: 14px;
+}
+.modal input:focus {
+  outline: none;
+  border-color: #7c9cff;
+}
+
+.modal-btn {
+  display: block;
+  width: 100%;
+  padding: 13px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+  margin-bottom: 8px;
+}
+.modal-btn.primary {
+  background: #7c9cff;
+  color: #0f1220;
+}
+.modal-btn.primary:hover { background: #a0b8ff; }
+.modal-btn.primary:disabled {
+  background: #2a3158;
+  color: #6b7391;
+  cursor: not-allowed;
+}
+.modal-btn.ghost {
+  background: transparent;
+  color: #7c9cff;
+  border: 1px solid #2a3158;
+}
+.modal-btn.ghost:hover {
+  border-color: #7c9cff;
+  background: #1a2145;
+}
+
+.modal-msg {
+  text-align: center;
+  font-size: 0.88rem;
+  margin-top: 10px;
+  min-height: 20px;
+}
+.modal-msg.ok { color: #4ade80; }
+.modal-msg.err { color: #ff8a8a; }
 </style>
 </head>
 <body>
@@ -322,8 +478,8 @@
     <input type="text" id="username" placeholder="Tu nombre de usuario de Roblox" maxlength="30" autocomplete="off">
 
     <a href="#" class="btn-wsp" id="wspBtn">
-      📲 Pedir por WhatsApp
-    </a>
+  ✅ Confirmar pedido
+</a>
     <button class="btn-reset" id="resetBtn">Cancelar selección</button>
   </div>
 
@@ -554,8 +710,9 @@
 
 <!-- ===================== SCRIPT DE SELECCIÓN ===================== -->
 <script>
-  // ⚠️ CAMBIA ESTE NÚMERO POR TU WHATSAPP REAL (código de país + número, sin + ni espacios)
-  const WHATSAPP_NUMBER = "51967378881";
+  // ⚠️ CAMBIA ESTOS DOS DATOS:
+  const TU_CORREO = "zamatajosue2@gmail.com";        // A dónde llegan los pedidos
+  const TU_WHATSAPP = "51967378881";             // Tu WhatsApp (opcional, para el mensaje copiado)
 
   const cards = document.querySelectorAll('.card');
   const orderBox = document.getElementById('orderBox');
@@ -565,6 +722,17 @@
   const usernameInput = document.getElementById('username');
   const wspBtn = document.getElementById('wspBtn');
   const resetBtn = document.getElementById('resetBtn');
+
+  const modal = document.getElementById('modal');
+  const modalClose = document.getElementById('modalClose');
+  const mPackage = document.getElementById('mPackage');
+  const mPrice = document.getElementById('mPrice');
+  const mUser = document.getElementById('mUser');
+  const mTotal = document.getElementById('mTotal');
+  const mEmail = document.getElementById('mEmail');
+  const mSend = document.getElementById('mSend');
+  const mCopy = document.getElementById('mCopy');
+  const mMsg = document.getElementById('mMsg');
 
   let selected = null;
 
@@ -586,7 +754,7 @@
     });
   });
 
-  // Botón de WhatsApp: construye la URL y la abre directamente
+  // Al hacer clic en "Pedir": abrir modal
   wspBtn.addEventListener('click', (e) => {
     e.preventDefault();
 
@@ -602,12 +770,111 @@
       return;
     }
 
-    // Construir el mensaje
-    const msg = `Hola JM Recargas 👋\n\nQuiero comprar:\n📦 Paquete: ${selected.label}\n💰 Precio: S/ ${selected.price}\n👤 Usuario de Roblox: ${user}\n\n¿Me indicas el número de Yape para pagar?`;
+    // Rellenar modal
+    mPackage.textContent = selected.label;
+    mPrice.textContent = 'S/ ' + selected.price;
+    mUser.textContent = user;
+    mTotal.textContent = 'S/ ' + selected.price;
+    mMsg.textContent = '';
+    mMsg.className = 'modal-msg';
+    mSend.disabled = false;
+    mSend.textContent = '📩 Enviar pedido';
 
-    // Abrir WhatsApp directamente
-    const url = `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank');
+    // Mostrar modal
+    modal.classList.add('active');
+  });
+
+  // Cerrar modal
+  modalClose.addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  function closeModal() {
+    modal.classList.remove('active');
+  }
+
+  // Enviar pedido por email (FormSubmit)
+  mSend.addEventListener('click', async () => {
+    const email = mEmail.value.trim();
+
+    if (!email) {
+      mMsg.textContent = 'Por favor, escribe tu correo.';
+      mMsg.className = 'modal-msg err';
+      mEmail.focus();
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      mMsg.textContent = 'El correo no parece válido.';
+      mMsg.className = 'modal-msg err';
+      return;
+    }
+
+    mSend.disabled = true;
+    mSend.textContent = '⏳ Enviando...';
+    mMsg.textContent = '';
+    mMsg.className = 'modal-msg';
+
+    try {
+      const response = await fetch(`https://formsubmit.co/ajax/${TU_CORREO}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          _subject: `🎮 Nuevo pedido de Robux — ${selected.label}`,
+          Paquete: selected.label,
+          Precio: 'S/ ' + selected.price,
+          Usuario_Roblox: usernameInput.value.trim(),
+          Correo_Cliente: email,
+          Total: 'S/ ' + selected.price
+        })
+      });
+
+      if (response.ok) {
+        mMsg.textContent = '✅ ¡Pedido enviado! Te contactaremos pronto con el Yape.';
+        mMsg.className = 'modal-msg ok';
+        mSend.textContent = '✅ Enviado';
+        setTimeout(closeModal, 3000);
+      } else {
+        throw new Error('Error en el envío');
+      }
+    } catch (err) {
+      mMsg.textContent = '⚠️ Hubo un error. Intenta de nuevo.';
+      mMsg.className = 'modal-msg err';
+      mSend.disabled = false;
+      mSend.textContent = '📩 Reintentar';
+    }
+  });
+
+  // Copiar datos del pedido
+  mCopy.addEventListener('click', async () => {
+    const texto =
+      `🎮 PEDIDO — JM Recargas\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `📦 Paquete: ${selected.label}\n` +
+      `💰 Precio: S/ ${selected.price}\n` +
+      `👤 Usuario Roblox: ${usernameInput.value.trim()}\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `📱 Enviar a: ${TU_WHATSAPP}`;
+
+    try {
+      await navigator.clipboard.writeText(texto);
+      mMsg.textContent = '📋 Datos copiados al portapapeles';
+      mMsg.className = 'modal-msg ok';
+      setTimeout(() => {
+        mMsg.textContent = '';
+        mMsg.className = 'modal-msg';
+      }, 2500);
+    } catch (err) {
+      mMsg.textContent = 'No se pudo copiar. Copia manualmente.';
+      mMsg.className = 'modal-msg err';
+    }
   });
 
   // Botón reset
@@ -618,6 +885,28 @@
     usernameInput.value = '';
   });
 </script>
+<!-- ===================== MODAL DE PEDIDO ===================== -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <button class="modal-close" id="modalClose">✕</button>
 
+    <div class="modal-icon">🎮</div>
+    <h3>Confirma tu pedido</h3>
+    <p class="modal-sub">Revisa los datos antes de continuar</p>
+
+    <div class="modal-summary">
+      <div><span>Paquete</span><strong id="mPackage">—</strong></div>
+      <div><span>Precio</span><strong id="mPrice">—</strong></div>
+      <div><span>Usuario Roblox</span><strong id="mUser">—</strong></div>
+      <div class="modal-total"><span>Total a pagar</span><strong id="mTotal">—</strong></div>
+    </div>
+
+    <input type="email" id="mEmail" placeholder="Tu correo (para enviarte el código de Yape)" autocomplete="email">
+
+    <button class="modal-btn primary" id="mSend">📩 Enviar pedido</button>
+    <button class="modal-btn ghost" id="mCopy">📋 Copiar datos del pedido</button>
+    <p class="modal-msg" id="mMsg"></p>
+  </div>
+</div>
 </body>
 </html>
