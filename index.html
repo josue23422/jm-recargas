@@ -568,62 +568,46 @@
 
   let selected = null;
 
+  // Selección de paquete
   cards.forEach(card => {
     card.addEventListener('click', () => {
-      // Quitar selección anterior
       cards.forEach(c => c.classList.remove('selected'));
-      // Marcar esta
       card.classList.add('selected');
       selected = {
         robux: card.dataset.robux,
         price: card.dataset.price,
         label: card.querySelector('h4').textContent
       };
-      // Actualizar resumen
       orderPackage.textContent = selected.label;
       orderPrice.textContent = 'S/ ' + selected.price;
       orderTotal.textContent = 'S/ ' + selected.price;
-      // Mostrar caja
       orderBox.classList.add('active');
-      // Scroll suave a la caja
       orderBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
   });
 
-  // Actualizar enlace de WhatsApp cuando escribe el usuario
-  usernameInput.addEventListener('input', updateWspLink);
-
-  function updateWspLink(e) {
-    if (e) e.preventDefault();
-    if (!selected) return;
-
-    const user = usernameInput.value.trim();
-    if (!user) {
-      // Si no escribió usuario, abre WhatsApp con mensaje sin usuario
-      const msg = `Hola JM Recargas 👋%0A%0AQuiero comprar:%0A📦 Paquete: ${selected.label}%0A💰 Precio: S/ ${selected.price}%0A👤 Usuario de Roblox: (lo envío en el chat)%0A%0A¿Me indicas el número de Yape para pagar?`;
-      wspBtn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
-      return;
-    }
-
-    const msg = `Hola JM Recargas 👋%0A%0AQuiero comprar:%0A📦 Paquete: ${selected.label}%0A💰 Precio: S/ ${selected.price}%0A👤 Usuario de Roblox: ${encodeURIComponent(user)}%0A%0A¿Me indicas el número de Yape para pagar?`;
-    wspBtn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
-  }
-
-  // Al hacer clic en WhatsApp, validar usuario
+  // Botón de WhatsApp: construye la URL y la abre directamente
   wspBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+
     if (!selected) {
-      e.preventDefault();
       alert('Primero selecciona un paquete.');
       return;
     }
+
     const user = usernameInput.value.trim();
     if (!user) {
-      e.preventDefault();
       alert('Por favor, escribe tu nombre de usuario de Roblox antes de continuar.');
       usernameInput.focus();
       return;
     }
-    updateWspLink(e);
+
+    // Construir el mensaje
+    const msg = `Hola JM Recargas 👋\n\nQuiero comprar:\n📦 Paquete: ${selected.label}\n💰 Precio: S/ ${selected.price}\n👤 Usuario de Roblox: ${user}\n\n¿Me indicas el número de Yape para pagar?`;
+
+    // Abrir WhatsApp directamente
+    const url = `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
   });
 
   // Botón reset
